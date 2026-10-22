@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_azure_functions_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_azure_functions';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class AzureFunctionsResult {
+  /// Creates a result.
   const AzureFunctionsResult({
     this.functionApp,
     this.functionName,
@@ -86,8 +87,13 @@ class AzureFunctionsResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class AzureFunctionsCallResult<T> {
+  /// Creates a call result.
   const AzureFunctionsCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final AzureFunctionsResult? result;
 }
@@ -120,7 +126,7 @@ Future<T> tracedAzureFunctions<T>({
   final span = _tracer().startSpan(
     'azure_functions $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
@@ -128,70 +134,70 @@ Future<T> tracedAzureFunctions<T>({
       final res = r.result!;
       final extras = <Attribute<Object>>[];
       if (res.functionApp != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.function_app',
           res.functionApp!,
         ));
       }
       if (res.functionName != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.function.name',
           res.functionName!,
         ));
       }
       if (res.region != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.region',
           res.region!,
         ));
       }
       if (res.plan != null) {
-        extras.add(OTel.attributeString('azure_functions.plan', res.plan!));
+        extras.add(OTelAPI.attributeString('azure_functions.plan', res.plan!));
       }
       if (res.runtime != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.runtime',
           res.runtime!,
         ));
       }
       if (res.runtimeVersion != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.runtime.version',
           res.runtimeVersion!,
         ));
       }
       if (res.triggerKind != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.trigger.kind',
           res.triggerKind!,
         ));
       }
       if (res.invocationId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.invocation.id',
           res.invocationId!,
         ));
       }
       if (res.coldStart != null) {
-        extras.add(OTel.attributeBool(
+        extras.add(OTelAPI.attributeBool(
           'azure_functions.cold_start',
           res.coldStart!,
         ));
       }
       if (res.durationMs != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'azure_functions.duration_ms',
           res.durationMs!,
         ));
       }
       if (res.gbSeconds != null) {
-        extras.add(OTel.attributeDouble(
+        extras.add(OTelAPI.attributeDouble(
           'azure_functions.gb_seconds',
           res.gbSeconds!,
         ));
       }
       if (res.executionResult != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.execution.result',
           res.executionResult!,
         ));
@@ -200,31 +206,31 @@ Future<T> tracedAzureFunctions<T>({
         }
       }
       if (res.alwaysOn != null) {
-        extras.add(OTel.attributeBool(
+        extras.add(OTelAPI.attributeBool(
           'azure_functions.always_on',
           res.alwaysOn!,
         ));
       }
       if (res.maxConcurrent != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'azure_functions.max_concurrent',
           res.maxConcurrent!,
         ));
       }
       if (res.scaleInstanceCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'azure_functions.scale.instance_count',
           res.scaleInstanceCount!,
         ));
       }
       if (res.durableInstanceId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.durable.instance_id',
           res.durableInstanceId!,
         ));
       }
       if (res.durableRuntimeStatus != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.durable.runtime_status',
           res.durableRuntimeStatus!,
         ));
@@ -237,20 +243,20 @@ Future<T> tracedAzureFunctions<T>({
         }
       }
       if (res.errorCode != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.error.code',
           res.errorCode!,
         ));
         span.setStatus(SpanStatusCode.Error, 'Functions ${res.errorCode}');
       }
       if (res.errorMessage != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'azure_functions.error.message',
           res.errorMessage!,
         ));
       }
       if (res.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           res.statusCode!,
         ));
@@ -261,13 +267,13 @@ Future<T> tracedAzureFunctions<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
